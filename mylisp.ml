@@ -63,6 +63,19 @@ let lisp_mac args env = match args with
       | _ -> raise (Lisp_error "Invalid parameters")) params), copyenv ((ref [])::env)))
   | _ -> raise (Lisp_error "malformed mac")
 ;;
+let lisp_quote args env = match args with
+    [ex] -> ex
+  | _ -> raise (Lisp_error "malformed quote")
+;;
+let lisp_qquote args env = match args with
+    [ex] -> let rec expand e = match e with
+          List [Symbol "unq"; a] -> eval a env
+        | List lst -> List (List.map expand lst)
+        | a -> a
+      in
+        expand ex
+  | _ -> raise (Lisp_error "malformed qquote")
+;;
 let lisp_begin args env = let newenv = (ref [])::env in
   List.iter (fun ex -> ignore (eval ex newenv)) (butlast args);
   match (last args) with
@@ -86,6 +99,8 @@ let _ =
       ("def", Fn (Builtin lisp_def));
       ("fun", Fn (Builtin lisp_fun));
       ("mac", Fn (Builtin lisp_mac));
+      ("quote", Fn (Builtin lisp_quote));
+      ("qquote", Fn (Builtin lisp_qquote));
       ("foo", Int 10)]] in
     while true do
       let result = Parser.main Lexer.token lexbuf in
