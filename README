@@ -21,6 +21,8 @@ OCamlで実装したLispインタプリタです。
   car リストの最初の要素を取得。引数はリスト。 例: (car (list 1 2 3))
   cdr 最初の要素を除いたリストを取得。引数はリスト。 例: (cdr (list 1 2 3))
   begin 式を順番に実行。最後の式の結果が返る。 例: (begin (def a 10) (print a))
+  quote 引数を評価せずにそのまま返す。引数は一つだけ。 例: (quote (a b c))
+  qquote 準クオート。基本的にquoteと同じだが、(unq 式)というのが出た時は式を評価。
 
 beginは新しいスコープを作ります。
 
@@ -35,6 +37,10 @@ beginは新しいスコープを作ります。
   makeするとmylispという実行ファイルが生成されるので、
   ./mylispを実行すればREPLが起動します。
   終了の方法はまだ作っていないので、構文エラーを出すかCtrl+CかCtrl+Dで終了します。
+
+例:
+  defunマクロの定義
+  (def defun (mac (name params body) (qquote (def (unq name) (fun (unq params) (unq body))))))
 
 連絡先:
   tana
