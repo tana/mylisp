@@ -8,6 +8,7 @@ exception Lisp_error of string;;
  * environment型は環境 新しいスコープに入る時に変数リストを積む *)
 type expr = Int of int | Symbol of string | List of expr list | Fn of func
 and func = Func of expr * (string list) * environment
+              | Macro of expr * (string list) * environment
               | Builtin of (expr list -> environment -> expr)
 and varlist = (string * expr) list
 and environment = (varlist ref) list;;
@@ -52,6 +53,12 @@ and apply fn args env = match fn with
     Func (ex, params, e) -> 
       if (List.length params) <> (List.length args) then
         raise (Lisp_error "Invalid argument")
-      else eval ex ((ref (List.combine params args))::(e@env))
+      else
+        eval ex ((ref (List.combine params
+                                  (List.map (fun ex -> eval ex env) args)))::(e@env))
+  | Macro (ex, params, e) ->
+      if (List.length params) <> (List.length args) then
+        raise (Lisp_error "Invalid argument")
+      else eval (eval ex ((ref (List.combine params args))::(e@env))) env
   | Builtin f -> f args env
 ;;
