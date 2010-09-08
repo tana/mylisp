@@ -17,7 +17,9 @@ and environment = (varlist ref) list;;
 let rec string_of_expr = function
     Int x -> string_of_int x
   | Symbol s -> s
-  | Fn _ -> "#<Function>"
+  | Fn (Func _) -> "#<Func>"
+  | Fn (Macro _) -> "#<Macro>"
+  | Fn (Builtin _) -> "#<Builtin>"
   | List l -> "(" ^ let rec p = (function
         x::xs -> string_of_expr x ^ " " ^ p xs
       | [] -> ")") in

@@ -57,6 +57,12 @@ let lisp_fun args env = match args with
       | _ -> raise (Lisp_error "Invalid parameters")) params), copyenv ((ref [])::env)))
   | _ -> raise (Lisp_error "malformed fun")
 ;;
+let lisp_mac args env = match args with
+    [List params; body] -> Fn (Macro (body, (List.map (function
+        Symbol s -> s
+      | _ -> raise (Lisp_error "Invalid parameters")) params), copyenv ((ref [])::env)))
+  | _ -> raise (Lisp_error "malformed mac")
+;;
 let lisp_begin args env = let newenv = (ref [])::env in
   List.iter (fun ex -> ignore (eval ex newenv)) (butlast args);
   match (last args) with
@@ -79,6 +85,7 @@ let _ =
       ("begin", Fn (Builtin lisp_begin));
       ("def", Fn (Builtin lisp_def));
       ("fun", Fn (Builtin lisp_fun));
+      ("mac", Fn (Builtin lisp_mac));
       ("foo", Int 10)]] in
     while true do
       let result = Parser.main Lexer.token lexbuf in
